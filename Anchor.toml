@@ -5,6 +5,7 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
+marketplace = "EQyrfGETTAa2FHMhLbkZVpfFcbxubQMitjPD37q9SWgj"
 minter = "7CwdhPXknwX1FfB3ibkREw1TZtrA9ThSDte7xi4gWxj9"
 publishing_platform = "7ngCaXyvZFyV8bpo6oSutCxxrcocVLoJ48cURQ8Xy2on"
 

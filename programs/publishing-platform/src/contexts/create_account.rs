@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use crate::state::user_account::UserAccount;
 
 #[derive(Accounts)]
-//#[instruction(role: u8)]y
+//#[instruction(role: u8)]
 pub struct CreateAccount<'info> {
     #[account(mut)]
     pub user: Signer<'info>,
