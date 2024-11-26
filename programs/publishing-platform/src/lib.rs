@@ -8,6 +8,7 @@ pub mod errors;
 pub use contexts::*;
 pub use state::*;
 pub use errors::*;
+
 #[program]
 pub mod publishing_platform {
 

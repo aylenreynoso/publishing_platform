@@ -14,8 +14,8 @@ pub mod minter {
         ctx.accounts.create_collection(&ctx.bumps)
     }
     
-    pub fn mint_nft(ctx: Context<MintNFT>) -> Result<()> {
-        ctx.accounts.mint_nft(&ctx.bumps)
+    pub fn mint_nft(ctx: Context<MintNFT>, ipfs_cid: String, title: String, symbol: String, royalties: u16) -> Result<()> {
+        ctx.accounts.mint_nft(&ctx.bumps, ipfs_cid, title, symbol, royalties)
     }
 
     pub fn verify_collection(ctx: Context<VerifyCollectionMint>) -> Result<()> {

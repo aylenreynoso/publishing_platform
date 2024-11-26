@@ -66,7 +66,7 @@ pub struct MintNFT<'info> {
 }
 
 impl<'info> MintNFT<'info> {
-    pub fn mint_nft(&mut self, bumps: &MintNFTBumps) -> Result<()> {
+    pub fn mint_nft(&mut self, bumps: &MintNFTBumps, ipfs_cid: String, title: String, symbol: String, royalties: u16) -> Result<()> {
 
         let metadata = &self.metadata.to_account_info();
         let master_edition = &self.master_edition.to_account_info();
@@ -114,10 +114,10 @@ impl<'info> MintNFT<'info> {
             }, 
             CreateMetadataAccountV3InstructionArgs {
                 data: DataV2 {
-                    name: "Mint Test".to_string(),
-                    symbol: "YAY".to_string(),
-                    uri: "".to_string(),
-                    seller_fee_basis_points: 0,
+                    name: title,
+                    symbol: symbol,
+                    uri: ipfs_cid,
+                    seller_fee_basis_points: royalties,
                     creators: Some(creator),
                     collection: Some(Collection {
                         verified: false,
