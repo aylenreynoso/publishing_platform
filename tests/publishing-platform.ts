@@ -24,41 +24,33 @@ describe("publishing-platform", () => {
   const writer = anchor.web3.Keypair.generate();
   const tipper = provider.wallet;
 
-  (async () => {
-    try {
-      // Airdrop to tipper
-      const airdropSignature = await provider.connection.requestAirdrop(
-        tipper.publicKey,
-        2 * LAMPORTS_PER_SOL
-      );
-      await provider.connection.confirmTransaction({
-        signature: airdropSignature,
-        blockhash: (await provider.connection.getLatestBlockhash()).blockhash,
-        lastValidBlockHeight: (
-          await provider.connection.getLatestBlockhash()
-        ).lastValidBlockHeight,
-      });
+  before(async () => {
+    // Airdrop to tipper
+    const airdropSignature = await provider.connection.requestAirdrop(
+      tipper.publicKey,
+      2 * LAMPORTS_PER_SOL
+    );
+    await provider.connection.confirmTransaction({
+      signature: airdropSignature,
+      blockhash: (await provider.connection.getLatestBlockhash()).blockhash,
+      lastValidBlockHeight: (
+        await provider.connection.getLatestBlockhash()
+      ).lastValidBlockHeight,
+    });
 
-      // Airdrop to writer
-      const writerAirdropSignature = await provider.connection.requestAirdrop(
-        writer.publicKey,
-        2 * LAMPORTS_PER_SOL
-      );
-      await provider.connection.confirmTransaction({
-        signature: writerAirdropSignature,
-        blockhash: (await provider.connection.getLatestBlockhash()).blockhash,
-        lastValidBlockHeight: (
-          await provider.connection.getLatestBlockhash()
-        ).lastValidBlockHeight,
-      });
-    } catch (e) {
-      if (e.logs) {
-        console.error(`Transaction failed with logs:`, e.logs);
-      } else {
-        console.error(`Oops, something went wrong: ${e}`);
-      }
-    }
-  })();
+    // Airdrop to writer
+    const writerAirdropSignature = await provider.connection.requestAirdrop(
+      writer.publicKey,
+      2 * LAMPORTS_PER_SOL
+    );
+    await provider.connection.confirmTransaction({
+      signature: writerAirdropSignature,
+      blockhash: (await provider.connection.getLatestBlockhash()).blockhash,
+      lastValidBlockHeight: (
+        await provider.connection.getLatestBlockhash()
+      ).lastValidBlockHeight,
+    });
+  });
 
   // Add these constants for user roles
   const WRITER_ROLE = 1;
