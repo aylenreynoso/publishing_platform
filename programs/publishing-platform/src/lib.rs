@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("CfjvZFVitk16jMv8iC5me38ytidG2jamjXdLgCgUFxEm");
+declare_id!("CLZfecSgY5BCfGAHLv46bGvqbbxEevkHxsFMRhV25wUF");
 
 pub mod contexts;
 pub mod state;
@@ -25,4 +25,7 @@ pub mod publishing_platform {
         ctx.accounts.tip_writer(amount)
     }
 
+    pub fn upload_content(ctx: Context<UploadContent>, ipfs_cid: String, title: String, symbol: String, royalties: u16, content_type: String) -> Result<()> {   
+        ctx.accounts.upload_content(ipfs_cid, title, symbol, royalties, content_type)
+    }
 }
