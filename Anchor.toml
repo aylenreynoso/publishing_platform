@@ -5,9 +5,9 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-marketplace = "H8Tka4gybGNxtD9PZB7Y33F5bLW6kbFcZasvFYhdbwgZ"
-minter = "DsWXjMnJ5b8gh5tKTRC5vJ8WKz2Eqdj7uPHq1Lq76DTm"
-publishing_platform = "CLZfecSgY5BCfGAHLv46bGvqbbxEevkHxsFMRhV25wUF"
+marketplace = "7GT9bTxgkFAsh2og6pCsFGRS5qx79LM4hmgcn3DsHsi6"
+minter = "FWSRvbQDi4kP6x2QvkXig5XNqXsFtH7QfiW6VMjmtHGk"
+publishing_platform = "7GT9bTxgkFAsh2og6pCsFGRS5qx79LM4hmgcn3DsHsi6"
 
 [registry]
 url = "https://api.apr.dev"

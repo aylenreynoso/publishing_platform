@@ -2,10 +2,27 @@ import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { PublishingPlatform } from "../target/types/publishing_platform";
 import { Minter } from "../target/types/minter";
-import { SystemProgram } from "@solana/web3.js";
+import {
+  Keypair,
+  SystemProgram,
+  PublicKey,
+  LAMPORTS_PER_SOL,
+} from "@solana/web3.js";
 import { assert } from "chai";
-import { PublicKey } from "@solana/web3.js";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import {
+  ASSOCIATED_TOKEN_PROGRAM_ID,
+  TOKEN_PROGRAM_ID,
+  getAssociatedTokenAddressSync,
+} from "@solana/spl-token";
+import { ASSOCIATED_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/utils/token";
+const TOKEN_METADATA_PROGRAM_ID = new anchor.web3.PublicKey(
+  "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+);
+const MINTER_PROGRAM_ID = new anchor.web3.PublicKey(
+  "FWSRvbQDi4kP6x2QvkXig5XNqXsFtH7QfiW6VMjmtHGk"
+);
+const WRITER_ROLE = 1;
+const READER_ROLE = 2;
 
 describe("publishing-platform", () => {
   // Configure the client to use the local cluster.
@@ -15,13 +32,15 @@ describe("publishing-platform", () => {
   const publishingPlatform = anchor.workspace
     .PublishingPlatform as Program<PublishingPlatform>;
 
-  const minter = anchor.workspace.Minter as Program<Minter>;
-
   const platformAccount = anchor.web3.Keypair.generate();
   const user = provider.wallet;
 
   // Add these new variables for tip writer tests
   const writer = anchor.web3.Keypair.generate();
+  const writerAccount = PublicKey.findProgramAddressSync(
+    [Buffer.from("user"), writer.publicKey.toBuffer()],
+    publishingPlatform.programId
+  )[0];
   const tipper = provider.wallet;
 
   before(async () => {
@@ -51,10 +70,6 @@ describe("publishing-platform", () => {
       ).lastValidBlockHeight,
     });
   });
-
-  // Add these constants for user roles
-  const WRITER_ROLE = 1;
-  const READER_ROLE = 2;
 
   it("Publishing Platform initialized!", async () => {
     const init_accounts = {
@@ -87,10 +102,7 @@ describe("publishing-platform", () => {
     // First create writer account
     const createWriterAccounts = {
       user: writer.publicKey,
-      userAccount: PublicKey.findProgramAddressSync(
-        [Buffer.from("user"), writer.publicKey.toBuffer()],
-        publishingPlatform.programId
-      )[0],
+      userAccount: writerAccount,
       systemProgram: SystemProgram.programId,
     };
 
@@ -109,10 +121,7 @@ describe("publishing-platform", () => {
     const tipAccounts = {
       reader: tipper.publicKey,
       writer: writer.publicKey,
-      writerAccount: PublicKey.findProgramAddressSync(
-        [Buffer.from("user"), writer.publicKey.toBuffer()],
-        publishingPlatform.programId
-      )[0],
+      writerAccount: writerAccount,
       systemProgram: SystemProgram.programId,
     };
 
@@ -143,10 +152,7 @@ describe("publishing-platform", () => {
     const tipAccounts = {
       reader: tipper.publicKey,
       writer: unregisteredWriter.publicKey,
-      writerAccount: PublicKey.findProgramAddressSync(
-        [Buffer.from("user"), unregisteredWriter.publicKey.toBuffer()],
-        publishingPlatform.programId
-      )[0],
+      writerAccount: writerAccount,
       systemProgram: SystemProgram.programId,
     };
 
@@ -169,10 +175,7 @@ describe("publishing-platform", () => {
     const tipAccounts = {
       reader: tipper.publicKey,
       writer: writer.publicKey,
-      writerAccount: PublicKey.findProgramAddressSync(
-        [Buffer.from("user"), writer.publicKey.toBuffer()],
-        publishingPlatform.programId
-      )[0],
+      writerAccount: writerAccount,
       systemProgram: SystemProgram.programId,
     };
 
@@ -188,6 +191,140 @@ describe("publishing-platform", () => {
         "Error",
         "Expected error about zero tip amount"
       );
+    }
+  });
+});
+
+describe("upload-content", () => {
+  // Configure the client to use the local cluster.
+  anchor.setProvider(anchor.AnchorProvider.env());
+  const provider = anchor.AnchorProvider.env();
+  const user = provider.wallet;
+
+  const publishingPlatform = anchor.workspace
+    .PublishingPlatform as Program<PublishingPlatform>;
+
+  //const platformAccount = Keypair.generate();
+
+  // Add these new variables for tip writer tests
+  const writer = Keypair.generate();
+  const writerAccount = PublicKey.findProgramAddressSync(
+    [Buffer.from("user"), writer.publicKey.toBuffer()],
+    publishingPlatform.programId
+  )[0];
+
+  const mintAuthority = PublicKey.findProgramAddressSync(
+    [Buffer.from("authority")],
+    MINTER_PROGRAM_ID
+  )[0];
+
+  const collectionKeypair = Keypair.generate();
+  const collectionMint = collectionKeypair.publicKey;
+
+  const mintKeypair = Keypair.generate();
+  const mint = mintKeypair.publicKey;
+
+  const getMetadata = async (
+    mint: anchor.web3.PublicKey
+  ): Promise<anchor.web3.PublicKey> => {
+    return anchor.web3.PublicKey.findProgramAddressSync(
+      [
+        Buffer.from("metadata"),
+        TOKEN_METADATA_PROGRAM_ID.toBuffer(),
+        mint.toBuffer(),
+      ],
+      TOKEN_METADATA_PROGRAM_ID
+    )[0];
+  };
+
+  const getMasterEdition = async (
+    mint: anchor.web3.PublicKey
+  ): Promise<anchor.web3.PublicKey> => {
+    return anchor.web3.PublicKey.findProgramAddressSync(
+      [
+        Buffer.from("metadata"),
+        TOKEN_METADATA_PROGRAM_ID.toBuffer(),
+        mint.toBuffer(),
+        Buffer.from("edition"),
+      ],
+      TOKEN_METADATA_PROGRAM_ID
+    )[0];
+  };
+
+  before(async () => {
+    // Airdrop to tipper
+    const airdropSignature = await provider.connection.requestAirdrop(
+      user.publicKey,
+      2 * LAMPORTS_PER_SOL
+    );
+    await provider.connection.confirmTransaction({
+      signature: airdropSignature,
+      blockhash: (await provider.connection.getLatestBlockhash()).blockhash,
+      lastValidBlockHeight: (
+        await provider.connection.getLatestBlockhash()
+      ).lastValidBlockHeight,
+    });
+
+    // Airdrop to writer
+    const writerAirdropSignature = await provider.connection.requestAirdrop(
+      writer.publicKey,
+      2 * LAMPORTS_PER_SOL
+    );
+    await provider.connection.confirmTransaction({
+      signature: writerAirdropSignature,
+      blockhash: (await provider.connection.getLatestBlockhash()).blockhash,
+      lastValidBlockHeight: (
+        await provider.connection.getLatestBlockhash()
+      ).lastValidBlockHeight,
+    });
+  });
+
+  it("Create Collection NFT", async () => {
+    try {
+      console.log("\nCollection Mint Key: ", collectionMint.toBase58());
+
+      const metadata = await getMetadata(collectionMint);
+      console.log("Collection Metadata Account: ", metadata.toBase58());
+
+      const masterEdition = await getMasterEdition(collectionMint);
+      console.log("Master Edition Account: ", masterEdition.toBase58());
+
+      const destination = getAssociatedTokenAddressSync(
+        collectionMint,
+        user.publicKey
+      );
+      console.log("Destination ATA = ", destination.toBase58());
+
+      const tx = await publishingPlatform.methods
+        .uploadContent(
+          "QmXExS4BMc1YrH6iWERyryFcDWkvobxryXSwECLrcd7Y1H",
+          "My First Article",
+          "ART1",
+          500,
+          "0"
+        )
+        .accountsPartial({
+          writer: user.publicKey, //user signer
+          //writerAccount: writerAccount, //to check writer role
+          collectionMint: collectionMint, //collection mint
+          collectionAuthority: mintAuthority, //mint authority
+          collectionMetadata: metadata, //metadata account
+          collectionMasterEdition: masterEdition, //master edition account
+          collectionDestination: destination, //destination ata
+          minterProgram: MINTER_PROGRAM_ID, //minter program
+          systemProgram: SystemProgram.programId, //system program
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+          tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
+        })
+        .signers([collectionKeypair])
+        .rpc({
+          skipPreflight: true,
+        });
+      console.log("\nCollection NFT minted: TxID - ", tx);
+    } catch (error) {
+      console.error("Create Collection Error:", error);
+      throw error;
     }
   });
 });

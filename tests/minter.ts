@@ -1,7 +1,7 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { Minter } from "../target/types/minter";
-import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
+
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
@@ -91,8 +91,6 @@ describe("minter", () => {
         .signers([collectionKeypair])
         .rpc({
           skipPreflight: true,
-          commitment: "confirmed",
-          maxRetries: 3,
         });
       console.log("\nCollection NFT minted: TxID - ", tx);
     } catch (error) {
