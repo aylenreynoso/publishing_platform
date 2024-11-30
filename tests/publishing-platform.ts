@@ -19,7 +19,7 @@ const TOKEN_METADATA_PROGRAM_ID = new anchor.web3.PublicKey(
   "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
 );
 const MINTER_PROGRAM_ID = new anchor.web3.PublicKey(
-  "FWSRvbQDi4kP6x2QvkXig5XNqXsFtH7QfiW6VMjmtHGk"
+  "EXPvzc6pX1CCUkTn6a8rSHNWFfRAYGWksf85xk7abcMP"
 );
 const WRITER_ROLE = 1;
 const READER_ROLE = 2;
@@ -212,7 +212,7 @@ describe("upload-content", () => {
     [Buffer.from("user"), writer.publicKey.toBuffer()],
     publishingPlatform.programId
   )[0];
-
+  //use as authority for collection and nft signing
   const mintAuthority = PublicKey.findProgramAddressSync(
     [Buffer.from("authority")],
     MINTER_PROGRAM_ID
@@ -221,13 +221,11 @@ describe("upload-content", () => {
   const collectionKeypair = Keypair.generate();
   const collectionMint = collectionKeypair.publicKey;
 
-  const mintKeypair = Keypair.generate();
-  const mint = mintKeypair.publicKey;
+  const nftKeypair = Keypair.generate();
+  const nftMint = nftKeypair.publicKey;
 
-  const getMetadata = async (
-    mint: anchor.web3.PublicKey
-  ): Promise<anchor.web3.PublicKey> => {
-    return anchor.web3.PublicKey.findProgramAddressSync(
+  const getMetadata = async (mint: PublicKey): Promise<PublicKey> => {
+    return PublicKey.findProgramAddressSync(
       [
         Buffer.from("metadata"),
         TOKEN_METADATA_PROGRAM_ID.toBuffer(),
@@ -237,10 +235,8 @@ describe("upload-content", () => {
     )[0];
   };
 
-  const getMasterEdition = async (
-    mint: anchor.web3.PublicKey
-  ): Promise<anchor.web3.PublicKey> => {
-    return anchor.web3.PublicKey.findProgramAddressSync(
+  const getMasterEdition = async (mint: PublicKey): Promise<PublicKey> => {
+    return PublicKey.findProgramAddressSync(
       [
         Buffer.from("metadata"),
         TOKEN_METADATA_PROGRAM_ID.toBuffer(),
@@ -283,17 +279,40 @@ describe("upload-content", () => {
     try {
       console.log("\nCollection Mint Key: ", collectionMint.toBase58());
 
-      const metadata = await getMetadata(collectionMint);
-      console.log("Collection Metadata Account: ", metadata.toBase58());
+      const collectionMetadata = await getMetadata(collectionMint);
+      console.log(
+        "Collection Metadata Account: ",
+        collectionMetadata.toBase58()
+      );
 
-      const masterEdition = await getMasterEdition(collectionMint);
-      console.log("Master Edition Account: ", masterEdition.toBase58());
+      const collectionMasterEdition = await getMasterEdition(collectionMint);
+      console.log(
+        "Collection Master Edition Account: ",
+        collectionMasterEdition.toBase58()
+      );
 
-      const destination = getAssociatedTokenAddressSync(
+      const collectionDestination = getAssociatedTokenAddressSync(
         collectionMint,
         user.publicKey
       );
-      console.log("Destination ATA = ", destination.toBase58());
+      console.log(
+        "Collection Destination ATA = ",
+        collectionDestination.toBase58()
+      );
+
+      console.log("\nNFT Mint Key: ", nftMint.toBase58());
+
+      const nftMetadata = await getMetadata(nftMint);
+      console.log("NFT Metadata Account: ", nftMetadata.toBase58());
+
+      const nftMasterEdition = await getMasterEdition(nftMint);
+      console.log("NFT Master Edition Account: ", nftMasterEdition.toBase58());
+
+      const nftDestination = getAssociatedTokenAddressSync(
+        nftMint,
+        user.publicKey
+      );
+      console.log("NFT Destination ATA = ", nftDestination.toBase58());
 
       const tx = await publishingPlatform.methods
         .uploadContent(
@@ -308,22 +327,26 @@ describe("upload-content", () => {
           //writerAccount: writerAccount, //to check writer role
           collectionMint: collectionMint, //collection mint
           collectionAuthority: mintAuthority, //mint authority
-          collectionMetadata: metadata, //metadata account
-          collectionMasterEdition: masterEdition, //master edition account
-          collectionDestination: destination, //destination ata
+          collectionMetadata: collectionMetadata, //metadata account
+          collectionMasterEdition: collectionMasterEdition, //master edition account
+          collectionDestination: collectionDestination, //destination ata
+          nftMint: nftMint, //nft mint
+          nftMetadata: nftMetadata, //nft metadata account
+          nftMasterEdition: nftMasterEdition, //nft master edition account
+          nftDestination: nftDestination, //nft destination ata
           minterProgram: MINTER_PROGRAM_ID, //minter program
           systemProgram: SystemProgram.programId, //system program
           tokenProgram: TOKEN_PROGRAM_ID,
           associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
           tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
         })
-        .signers([collectionKeypair])
+        .signers([collectionKeypair, nftKeypair])
         .rpc({
           skipPreflight: true,
         });
-      console.log("\nCollection NFT minted: TxID - ", tx);
+      console.log("\nContent uploaded: TxID - ", tx);
     } catch (error) {
-      console.error("Create Collection Error:", error);
+      console.error("Upload Content Error:", error);
       throw error;
     }
   });

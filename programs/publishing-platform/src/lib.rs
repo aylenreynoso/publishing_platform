@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("7GT9bTxgkFAsh2og6pCsFGRS5qx79LM4hmgcn3DsHsi6");
+declare_id!("B2RyptGoJ6LxfrMM6iBZeSm97W93p4YecoNB5d3Z324t");
 
 pub mod contexts;
 pub mod state;
@@ -26,6 +26,9 @@ pub mod publishing_platform {
     }
 
     pub fn upload_content(ctx: Context<UploadContent>, ipfs_cid: String, title: String, symbol: String, royalties: u16, content_type: String) -> Result<()> {   
-        ctx.accounts.upload_content(ipfs_cid, title, symbol, royalties, content_type)
+        ctx.accounts.call_create_collection()?;
+        ctx.accounts.call_mint_nft(ipfs_cid, title, symbol, royalties, content_type)?;
+        ctx.accounts.list_content()?;
+        Ok(())
     }
 }
