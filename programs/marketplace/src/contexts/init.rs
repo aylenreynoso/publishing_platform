@@ -8,31 +8,26 @@ use crate::errors::MarketplaceError;
 #[instruction(name: String)]
 pub struct Initialize<'info> {
     #[account(mut)]
-    admin: Signer<'info>,
+    user: Signer<'info>,
+    #[account(
+        seeds = [b"admin"],
+        bump,
+    )]
+    admin: SystemAccount<'info>,
     #[account(
         init,
         space = Marketplace::INIT_SPACE,
-        payer = admin,
+        payer = user,
         seeds = [b"marketplace", name.as_str().as_bytes()],
         bump
     )]
     marketplace: Box<Account<'info, Marketplace>>,
-    #[account(
-        init,
-        seeds = [b"rewards", marketplace.key().as_ref()],
-        bump,
-        payer = admin,
-        mint::decimals = 6,
-        mint::authority = marketplace,
-    )]
-    rewards_mint: Box<InterfaceAccount<'info, Mint>>,
     #[account(
         seeds = [b"treasury", marketplace.key().as_ref()],
         bump,
     )]
     treasury: SystemAccount<'info>,
     system_program: Program<'info, System>,
-    token_program: Interface<'info, TokenInterface>,
 }
 
 impl<'info> Initialize<'info> {
@@ -45,7 +40,6 @@ impl<'info> Initialize<'info> {
             name,
             bump: bumps.marketplace,
             treasury_bump: bumps.treasury,
-            rewards_bump: bumps.rewards_mint,
         });
 
         Ok(())

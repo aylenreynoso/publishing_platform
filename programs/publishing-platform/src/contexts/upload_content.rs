@@ -2,7 +2,6 @@ use anchor_lang::prelude::*;
 //use crate::state::user_account::UserAccount;
 use minter::cpi::accounts::CreateCollection;
 use minter::cpi::accounts::MintNFT;
-use minter::instruction::MintNft;
 use minter::program::Minter;
 
 use anchor_spl::{

@@ -30,14 +30,6 @@ pub struct Purchase<'info> {
     vault: Box<InterfaceAccount<'info, TokenAccount>>,
     #[account(
         mut,
-        seeds = [b"rewards", marketplace.key().as_ref()],
-        bump = marketplace.rewards_bump,
-        mint::decimals = 6,
-        mint::authority = marketplace,
-    )]
-    rewards: Box<InterfaceAccount<'info, Mint>>,
-    #[account(
-        mut,
         close = maker,
         seeds = [marketplace.key().as_ref(), maker_mint.key().as_ref()],
         bump = listing.bump,

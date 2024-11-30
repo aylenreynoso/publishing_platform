@@ -1,7 +1,7 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { PublishingPlatform } from "../target/types/publishing_platform";
-import { Minter } from "../target/types/minter";
+
 import {
   Keypair,
   SystemProgram,
@@ -14,12 +14,14 @@ import {
   TOKEN_PROGRAM_ID,
   getAssociatedTokenAddressSync,
 } from "@solana/spl-token";
-import { ASSOCIATED_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/utils/token";
 const TOKEN_METADATA_PROGRAM_ID = new anchor.web3.PublicKey(
   "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
 );
 const MINTER_PROGRAM_ID = new anchor.web3.PublicKey(
-  "EXPvzc6pX1CCUkTn6a8rSHNWFfRAYGWksf85xk7abcMP"
+  "Csi65XvSe7Wbs4ZcUGmAgx22mAw8mCduaX71mwzAb2b"
+);
+const MARKETPLACE_PROGRAM_ID = new anchor.web3.PublicKey(
+  "Bx17atdmjhPiwcFfr4gpwW1p2M2DSCTLRSmoTb3UDZsE"
 );
 const WRITER_ROLE = 1;
 const READER_ROLE = 2;
@@ -34,6 +36,21 @@ describe("publishing-platform", () => {
 
   const platformAccount = anchor.web3.Keypair.generate();
   const user = provider.wallet;
+
+  const admin = PublicKey.findProgramAddressSync(
+    [Buffer.from("admin")],
+    MARKETPLACE_PROGRAM_ID
+  )[0];
+
+  const marketplace = PublicKey.findProgramAddressSync(
+    [Buffer.from("marketplace"), Buffer.from("platform")],
+    MARKETPLACE_PROGRAM_ID
+  )[0];
+
+  const treasury = PublicKey.findProgramAddressSync(
+    [Buffer.from("treasury"), marketplace.toBuffer()],
+    MARKETPLACE_PROGRAM_ID
+  )[0];
 
   // Add these new variables for tip writer tests
   const writer = anchor.web3.Keypair.generate();
@@ -72,15 +89,17 @@ describe("publishing-platform", () => {
   });
 
   it("Publishing Platform initialized!", async () => {
-    const init_accounts = {
-      platformAccount: platformAccount.publicKey,
-      user: user.publicKey,
-      systemProgram: SystemProgram.programId,
-    };
-
     const tx = await publishingPlatform.methods
       .initializePlatform()
-      .accounts(init_accounts)
+      .accountsPartial({
+        user: user.publicKey,
+        admin: admin,
+        platformAccount: platformAccount.publicKey,
+        marketplace: marketplace,
+        treasury: treasury,
+        marketplaceProgram: MARKETPLACE_PROGRAM_ID,
+        systemProgram: SystemProgram.programId,
+      })
       .signers([platformAccount])
       .rpc();
 

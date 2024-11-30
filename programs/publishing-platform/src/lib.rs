@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("B2RyptGoJ6LxfrMM6iBZeSm97W93p4YecoNB5d3Z324t");
+declare_id!("8CjoRnJX56Rti4bzFjq6g2xhZK1gSmJUWKHZEDDAQqHG");
 
 pub mod contexts;
 pub mod state;
@@ -14,7 +14,9 @@ pub mod publishing_platform {
 
     use super::*;   
     pub fn initialize_platform(ctx: Context<InitializePlatform>) -> Result<()> {
-        ctx.accounts.initialize_platform()
+        ctx.accounts.initialize_platform()?;
+        ctx.accounts.initialize_marketplace()?;
+        Ok(())
     }
     
     pub fn create_account(ctx: Context<CreateAccount>, role: u8) -> Result<()> {
