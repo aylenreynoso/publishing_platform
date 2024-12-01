@@ -266,34 +266,6 @@ describe("upload-content", () => {
     )[0];
   };
 
-  before(async () => {
-    // Airdrop to tipper
-    const airdropSignature = await provider.connection.requestAirdrop(
-      user.publicKey,
-      2 * LAMPORTS_PER_SOL
-    );
-    await provider.connection.confirmTransaction({
-      signature: airdropSignature,
-      blockhash: (await provider.connection.getLatestBlockhash()).blockhash,
-      lastValidBlockHeight: (
-        await provider.connection.getLatestBlockhash()
-      ).lastValidBlockHeight,
-    });
-
-    // Airdrop to writer
-    const writerAirdropSignature = await provider.connection.requestAirdrop(
-      writer.publicKey,
-      2 * LAMPORTS_PER_SOL
-    );
-    await provider.connection.confirmTransaction({
-      signature: writerAirdropSignature,
-      blockhash: (await provider.connection.getLatestBlockhash()).blockhash,
-      lastValidBlockHeight: (
-        await provider.connection.getLatestBlockhash()
-      ).lastValidBlockHeight,
-    });
-  });
-
   it("Create Collection NFT", async () => {
     try {
       console.log("\nCollection Mint Key: ", collectionMint.toBase58());

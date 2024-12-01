@@ -68,7 +68,7 @@ pub struct List<'info> {
     token_program: Interface<'info, TokenInterface>,
 }
 
-impl<'info> List<'info> {
+impl<'info> List <'info> {
     pub fn create_listing(&mut self, price: u64, bumps: &ListBumps) -> Result<()> {
         self.listing.set_inner(Listing {
             maker: self.maker.key(),
