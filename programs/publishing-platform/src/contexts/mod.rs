@@ -3,9 +3,12 @@ pub mod create_account;
 pub mod tip_writer;
 pub mod create_book;
 pub mod add_chapter;
-
+pub mod create_exclusive_content;
+pub mod verify_content_access;
 pub use initialize_platform::*;
 pub use create_account::*;
-    pub use tip_writer::*;
+pub use tip_writer::*;
 pub use create_book::*;
 pub use add_chapter::*;
+pub use create_exclusive_content::*;
+pub use verify_content_access::*;

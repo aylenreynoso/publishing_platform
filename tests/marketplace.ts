@@ -79,6 +79,10 @@ describe("marketplace", () => {
     buyer.publicKey
   );
 
+  let nftMetadata;
+  let nftMasterEdition;
+  let nftDestination;
+
   const listing = PublicKey.findProgramAddressSync(
     [marketplaceAccount.toBuffer(), nftMint.publicKey.toBuffer()],
     MARKETPLACE_PROGRAM_ID
@@ -112,31 +116,7 @@ describe("marketplace", () => {
         await provider.connection.getLatestBlockhash()
       ).lastValidBlockHeight,
     });
-  });
 
-  it("Initialize Marketplace", async () => {
-    const tx = await marketplace.methods
-      .initialize("platform", 10) //title and fee
-      .accountsPartial({
-        user: user.publicKey,
-        admin: admin,
-        marketplace: marketplaceAccount,
-        treasury: treasury,
-        systemProgram: SystemProgram.programId,
-      })
-      .signers([])
-      .rpc();
-
-    console.log("Marketplace initialized with signature:", tx);
-
-    const marketplaceData = await marketplace.account.marketplace.fetch(
-      marketplaceAccount
-    );
-    assert.equal(marketplaceData.name, "platform");
-    assert.equal(marketplaceData.fee, 10);
-  });
-
-  it("Create Listing", async () => {
     //Create Collection
     const collectionMetadata = await getMetadata(collectionMint.publicKey);
     const collectionMasterEdition = await getMasterEdition(
@@ -176,9 +156,9 @@ describe("marketplace", () => {
       throw error;
     }
 
-    const nftMetadata = await getMetadata(nftMint.publicKey);
-    const nftMasterEdition = await getMasterEdition(nftMint.publicKey);
-    const nftDestination = getAssociatedTokenAddressSync(
+    nftMetadata = await getMetadata(nftMint.publicKey);
+    nftMasterEdition = await getMasterEdition(nftMint.publicKey);
+    nftDestination = getAssociatedTokenAddressSync(
       nftMint.publicKey,
       seller.publicKey
     );
@@ -229,7 +209,31 @@ describe("marketplace", () => {
       .rpc({
         skipPreflight: true,
       });
+  });
 
+  it("Initialize Marketplace", async () => {
+    const tx = await marketplace.methods
+      .initialize("platform", 10) //title and fee
+      .accountsPartial({
+        user: user.publicKey,
+        admin: admin,
+        marketplace: marketplaceAccount,
+        treasury: treasury,
+        systemProgram: SystemProgram.programId,
+      })
+      .signers([])
+      .rpc();
+
+    console.log("Marketplace initialized with signature:", tx);
+
+    const marketplaceData = await marketplace.account.marketplace.fetch(
+      marketplaceAccount
+    );
+    assert.equal(marketplaceData.name, "platform");
+    assert.equal(marketplaceData.fee, 10);
+  });
+
+  it("Create Listing", async () => {
     const price = new anchor.BN(1 * LAMPORTS_PER_SOL);
 
     const tx = await marketplace.methods

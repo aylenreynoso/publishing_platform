@@ -1,14 +1,13 @@
 use anchor_lang::prelude::*;
 use crate::state::content::Book;
+use anchor_spl::token::Mint;
 
 #[derive(Accounts)]
 pub struct CreateBook<'info> {
     #[account(mut)]
     pub writer: Signer<'info>,
-    
     #[account(mut)]
-    pub collection_mint: SystemAccount<'info>,
-    
+    pub collection_mint: Account<'info, Mint>,
     #[account(
         init,
         payer = writer,
@@ -17,7 +16,6 @@ pub struct CreateBook<'info> {
         bump
     )]
     pub book: Account<'info, Book>,
-    
     pub system_program: Program<'info, System>,
 }
 

@@ -12,4 +12,8 @@ pub enum PublishingPlatformError {
     ChapterLimitExceeded,
     #[msg("Unauthorized writer")]
     UnauthorizedWriter,
+    #[msg("No NFT ownership")]
+    NoNftOwnership,
+    #[msg("Invalid collection")]
+    InvalidCollection,  
 }

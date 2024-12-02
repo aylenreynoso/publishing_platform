@@ -1,14 +1,14 @@
 use anchor_lang::prelude::*;
 use crate::state::content::{Chapter, Book};
 use crate::errors::PublishingPlatformError;
-
+use anchor_spl::token::Mint;
 #[derive(Accounts)]
 pub struct AddChapter<'info> {
     #[account(mut)]
     pub writer: Signer<'info>,
     
     #[account(mut)]
-    pub chapter_mint: SystemAccount<'info>,
+    pub chapter_mint: Account<'info, Mint>,
     
     #[account(
         mut,
@@ -18,7 +18,7 @@ pub struct AddChapter<'info> {
     )]
     pub book: Account<'info, Book>,
 
-    pub book_collection: SystemAccount<'info>,
+    pub book_collection: Account<'info, Mint>,
     
     #[account(
         init,

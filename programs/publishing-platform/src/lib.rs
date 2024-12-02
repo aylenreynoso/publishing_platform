@@ -34,6 +34,12 @@ pub mod publishing_platform {
         ctx.accounts.add_chapter(title, content_uri)
     }
 
+    pub fn create_exclusive_content(ctx: Context<CreateExclusiveContent>, content_uri: String) -> Result<()> {
+        ctx.accounts.create_exclusive_content(content_uri)
+    }
 
+    pub fn verify_access(ctx: Context<VerifyAccess>) -> Result<String> {
+        ctx.accounts.verify_access()
+    }   
 
 }
