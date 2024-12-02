@@ -1,3 +1,5 @@
+import { BN } from "bn.js";
+
 // tests/publishing-workflow.ts
 describe("Publishing Workflow", () => {
     const nftMinter = anchor.workspace.NftMinting;

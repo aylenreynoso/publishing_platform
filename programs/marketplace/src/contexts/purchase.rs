@@ -36,6 +36,7 @@ pub struct Purchase<'info> {
     )]
     listing: Box<Account<'info, Listing>>,
     #[account(
+        mut,
         seeds = [b"treasury", marketplace.key().as_ref()],
         bump = marketplace.treasury_bump,
     )]
@@ -56,7 +57,7 @@ impl<'info> Purchase<'info> {
 
         let amount = self.listing.price
             .checked_mul(self.marketplace.fee as u64).unwrap()
-            .checked_div(10000).unwrap();
+            .checked_div(100).unwrap();
 
         transfer(cpi_ctx, self.listing.price - amount)?;
 

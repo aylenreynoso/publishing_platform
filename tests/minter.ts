@@ -7,7 +7,7 @@ import {
   TOKEN_PROGRAM_ID,
   getAssociatedTokenAddressSync,
 } from "@solana/spl-token";
-import { Keypair, SystemProgram, Connection } from "@solana/web3.js";
+import { Keypair, SystemProgram, PublicKey } from "@solana/web3.js";
 import { ASSOCIATED_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/utils/token";
 
 describe("minter", () => {
@@ -16,11 +16,11 @@ describe("minter", () => {
   const user = provider.wallet;
   const program = anchor.workspace.Minter as Program<Minter>;
 
-  const TOKEN_METADATA_PROGRAM_ID = new anchor.web3.PublicKey(
+  const TOKEN_METADATA_PROGRAM_ID = new PublicKey(
     "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
   );
 
-  const mintAuthority = anchor.web3.PublicKey.findProgramAddressSync(
+  const mintAuthority = PublicKey.findProgramAddressSync(
     [Buffer.from("authority")],
     program.programId
   )[0];
@@ -31,10 +31,8 @@ describe("minter", () => {
   const mintKeypair = Keypair.generate();
   const mint = mintKeypair.publicKey;
 
-  const getMetadata = async (
-    mint: anchor.web3.PublicKey
-  ): Promise<anchor.web3.PublicKey> => {
-    return anchor.web3.PublicKey.findProgramAddressSync(
+  const getMetadata = async (mint: PublicKey): Promise<PublicKey> => {
+    return PublicKey.findProgramAddressSync(
       [
         Buffer.from("metadata"),
         TOKEN_METADATA_PROGRAM_ID.toBuffer(),
@@ -44,10 +42,8 @@ describe("minter", () => {
     )[0];
   };
 
-  const getMasterEdition = async (
-    mint: anchor.web3.PublicKey
-  ): Promise<anchor.web3.PublicKey> => {
-    return anchor.web3.PublicKey.findProgramAddressSync(
+  const getMasterEdition = async (mint: PublicKey): Promise<PublicKey> => {
+    return PublicKey.findProgramAddressSync(
       [
         Buffer.from("metadata"),
         TOKEN_METADATA_PROGRAM_ID.toBuffer(),
