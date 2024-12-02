@@ -179,4 +179,57 @@ describe("publishing-platform", () => {
       );
     }
   });
+
+  it("Create book and add chapters", async () => {
+    // First create the book collection
+    const bookMint = Keypair.generate();
+    const bookPDA = PublicKey.findProgramAddressSync(
+      [Buffer.from("book"), bookMint.publicKey.toBuffer()],
+      publishingPlatform.programId
+    )[0];
+
+    await publishingPlatform.methods
+      .createBook("My Book", 5, "Fiction")
+      .accountsPartial({
+        writer: writer.publicKey,
+        collectionMint: bookMint.publicKey,
+        book: bookPDA,
+        systemProgram: SystemProgram.programId,
+      })
+      .signers([writer])
+      .rpc();
+
+    // Later, add a chapter to the existing book
+    const chapterMint = Keypair.generate();
+    const chapterPDA = PublicKey.findProgramAddressSync(
+      [Buffer.from("chapter"), chapterMint.publicKey.toBuffer()],
+      publishingPlatform.programId
+    )[0];
+
+    await publishingPlatform.methods
+      .addChapter("Chapter 1", "ipfs://content-uri")
+      .accountsPartial({
+        writer: writer.publicKey,
+        chapterMint: chapterMint.publicKey,
+        bookCollection: bookMint.publicKey,
+        book: bookPDA,
+        chapter: chapterPDA,
+        systemProgram: SystemProgram.programId,
+      })
+      .signers([writer])
+      .rpc();
+
+    // Verify chapter was added
+    const bookAccount = await publishingPlatform.account.book.fetch(bookPDA);
+    assert.equal(bookAccount.chapterCount, 1);
+
+    const chapterAccount = await publishingPlatform.account.chapter.fetch(
+      chapterPDA
+    );
+    assert.equal(chapterAccount.chapterNumber, 1);
+    assert.equal(
+      chapterAccount.bookCollection.equals(bookMint.publicKey),
+      true
+    );
+  });
 });

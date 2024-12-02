@@ -7,5 +7,9 @@ pub enum PublishingPlatformError {
     #[msg("Account must have writer role to receive tips")]
     InvalidWriterRole,
     #[msg("Tip amount must be greater than zero")]
-    ZeroTipAmount,
+    ZeroTipAmount,  
+    #[msg("Chapter limit exceeded")]
+    ChapterLimitExceeded,
+    #[msg("Unauthorized writer")]
+    UnauthorizedWriter,
 }
