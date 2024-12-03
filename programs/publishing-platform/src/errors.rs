@@ -2,6 +2,8 @@ use anchor_lang::error_code;
 
 #[error_code]
 pub enum PublishingPlatformError {
+    #[msg("Invalid role specified")]
+    InvalidRole,
     #[msg("Writer account does not exist")]
     WriterAccountNotFound,
     #[msg("Account must have writer role to receive tips")]
@@ -15,5 +17,7 @@ pub enum PublishingPlatformError {
     #[msg("No NFT ownership")]
     NoNftOwnership,
     #[msg("Invalid collection")]
-    InvalidCollection,  
+    InvalidCollection,
+    #[msg("Invalid rating")]
+    InvalidRating,
 }

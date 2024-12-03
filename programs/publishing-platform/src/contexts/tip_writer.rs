@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use crate::errors::PublishingPlatformError;
-use crate::state::user_account::UserAccount;
+use crate::state::user_account::WriterAccount;
 
 #[derive(Accounts)]
 pub struct TipWriter<'info> {
@@ -9,12 +9,11 @@ pub struct TipWriter<'info> {
     #[account(mut)]
     pub writer: SystemAccount<'info>,
     #[account(
-        seeds = [b"user".as_ref(), writer.key().as_ref()],
+        seeds = [b"writer".as_ref(), writer.key().as_ref()],
         bump,
-        constraint = writer_account.role == 1 @ PublishingPlatformError::InvalidWriterRole,
         constraint = writer_account.wallet_address == writer.key() @ PublishingPlatformError::WriterAccountNotFound
     )]
-    pub writer_account: Account<'info, UserAccount>,
+    pub writer_account: Account<'info, WriterAccount>,
     pub system_program: Program<'info, System>,
 }
 

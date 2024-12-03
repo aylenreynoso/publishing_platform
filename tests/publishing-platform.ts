@@ -57,9 +57,13 @@ describe("publishing-platform", () => {
   const user = provider.wallet;
 
   const reader = Keypair.generate();
+  const readerAccount = PublicKey.findProgramAddressSync(
+    [Buffer.from("reader"), reader.publicKey.toBuffer()],
+    publishingPlatform.programId
+  )[0];
   const writer = Keypair.generate();
   const writerAccount = PublicKey.findProgramAddressSync(
-    [Buffer.from("user"), writer.publicKey.toBuffer()],
+    [Buffer.from("writer"), writer.publicKey.toBuffer()],
     publishingPlatform.programId
   )[0];
   const tipper = provider.wallet;
@@ -247,20 +251,54 @@ describe("publishing-platform", () => {
     );
   });
 
-  it("Can tip a writer", async () => {
-    // First create writer account
-    const createWriterAccounts = {
-      user: writer.publicKey,
-      userAccount: writerAccount,
-      systemProgram: SystemProgram.programId,
-    };
+  it("Create reader account", async () => {
+    const tx = await publishingPlatform.methods
+      .createReaderAccount()
+      .accountsPartial({
+        user: reader.publicKey,
+        userAccount: readerAccount,
+        systemProgram: SystemProgram.programId,
+      })
+      .signers([reader])
+      .rpc();
 
-    await publishingPlatform.methods
-      .createAccount(WRITER_ROLE)
-      .accounts(createWriterAccounts)
+    console.log("Reader account created with signature:", tx);
+
+    const readerAccountData =
+      await publishingPlatform.account.readerAccount.fetch(readerAccount);
+
+    assert.equal(
+      readerAccountData.walletAddress.toBase58(),
+      reader.publicKey.toBase58(),
+      "Reader wallet address should match"
+    );
+  });
+
+  it("Create writer account", async () => {
+    const tx = await publishingPlatform.methods
+      .createWriterAccount()
+      .accountsPartial({
+        user: writer.publicKey,
+        userAccount: writerAccount,
+        systemProgram: SystemProgram.programId,
+      })
       .signers([writer])
       .rpc();
 
+    console.log("Writer account created with signature:", tx);
+
+    // Fetch and verify the writer account
+    const writerAccountData =
+      await publishingPlatform.account.writerAccount.fetch(writerAccount);
+
+    assert.equal(
+      writerAccountData.walletAddress.toBase58(),
+      writer.publicKey.toBase58(),
+      "Writer wallet address should match"
+    );
+  });
+
+  it("Can tip a writer", async () => {
     // Get writer's initial balance
     const writerInitialBalance = await provider.connection.getBalance(
       writer.publicKey
@@ -287,7 +325,6 @@ describe("publishing-platform", () => {
       writer.publicKey
     );
 
-    // Verify the tip was received
     assert.equal(
       writerFinalBalance - writerInitialBalance,
       tipAmount.toNumber(),
@@ -430,6 +467,53 @@ describe("publishing-platform", () => {
       // Frontend would use the returned content_uri to fetch the actual content
     } catch (error) {
       console.error("Access Exclusive Content Error:", error);
+      throw error;
+    }
+  });
+
+  it("Submit review for chapter", async () => {
+    const review = "This is a great chapter! Really enjoyed the plot twists.";
+    const rating = 5;
+
+    const reviewPDA = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from("review"),
+        reader.publicKey.toBuffer(),
+        chapterPDA.toBuffer(),
+      ],
+      publishingPlatform.programId
+    )[0];
+
+    try {
+      const tx = await publishingPlatform.methods
+        .submitReview(review, rating)
+        .accountsPartial({
+          reviewer: reader.publicKey,
+          chapterAta: readerAta, // ATA of the chapter NFT
+          chapter: chapterPDA,
+          review: reviewPDA,
+          systemProgram: SystemProgram.programId,
+        })
+        .signers([reader])
+        .rpc();
+
+      console.log("Review submitted with signature:", tx);
+
+      // Verify the review was created
+      const reviewAccount = await publishingPlatform.account.review.fetch(
+        reviewPDA
+      );
+      assert.equal(reviewAccount.content, review);
+      assert.equal(reviewAccount.rating, rating);
+
+      // Verify chapter rating was updated
+      const chapterAccount = await publishingPlatform.account.chapter.fetch(
+        chapterPDA
+      );
+      assert.equal(chapterAccount.reviewCount, 1);
+      assert.equal(chapterAccount.rating, rating);
+    } catch (error) {
+      console.error("Error submitting review:", error);
       throw error;
     }
   });

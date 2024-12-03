@@ -18,9 +18,13 @@ pub mod publishing_platform {
         Ok(())
     }
     
-    pub fn create_account(ctx: Context<CreateAccount>, role: u8) -> Result<()> {
-        ctx.accounts.create_account(role, &ctx.bumps)
-    }
+    pub fn create_writer_account(ctx: Context<CreateWriterAccount>) -> Result<()> {
+        ctx.accounts.create_writer_account(&ctx.bumps)
+    }   
+
+    pub fn create_reader_account(ctx: Context<CreateReaderAccount>) -> Result<()> {
+        ctx.accounts.create_reader_account(&ctx.bumps)
+    }   
 
     pub fn tip_writer(ctx: Context<TipWriter>, amount : u64) -> Result<()> {
         ctx.accounts.tip_writer(amount)
@@ -40,6 +44,10 @@ pub mod publishing_platform {
 
     pub fn verify_access(ctx: Context<VerifyAccess>) -> Result<String> {
         ctx.accounts.verify_access()
-    }   
+    }
+
+    pub fn submit_review(ctx: Context<SubmitReview>, content: String, rating: u8) -> Result<()> {
+        ctx.accounts.submit_review(content, rating)
+    }
 
 }
