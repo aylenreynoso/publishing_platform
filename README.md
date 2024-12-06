@@ -10,7 +10,7 @@ This project consists of three main programs:
 - NFT Marketplace: Handles NFT listings and purchases
 - Minter: Handles NFT creation and collection management
 
-### Architectural Decision
+## Architectural Decision
 
 The initial approach was to use the Publishing Platform as a central entry point that would make CPI (Cross-Program Invocation) calls to the Marketplace and Minter programs. However, as the project complexity grew, a more modular approach was chosen where each program operates independently with clear boundaries and responsibilities. This decision:
 
@@ -95,6 +95,17 @@ The initial approach was to use the Publishing Platform as a central entry point
 - Secure NFT trading
 - Collection-based content organization
 
+## Program Addresses
+
+### Devnet Deployments
+
+- [Publishing Platform](https://explorer.solana.com/address/8CjoRnJX56Rti4bzFjq6g2xhZK1gSmJUWKHZEDDAQqHG?cluster=devnet)
+  8CjoRnJX56Rti4bzFjq6g2xhZK1gSmJUWKHZEDDAQqHG
+- [NFT Marketplace](https://explorer.solana.com/address/Bx17atdmjhPiwcFfr4gpwW1p2M2DSCTLRSmoTb3UDZsE?cluster=devnet)
+  Bx17atdmjhPiwcFfr4gpwW1p2M2DSCTLRSmoTb3UDZsE
+- [Minter](https://explorer.solana.com/address/Csi65XvSe7Wbs4ZcUGmAgx22mAw8mCduaX71mwzAb2b?cluster=devnet)
+  Csi65XvSe7Wbs4ZcUGmAgx22mAw8mCduaX71mwzAb2b
+
 ## Tests
 
 - The test suite focuses on integration testing, simulating real-world usage scenarios rather than unit tests. Each test file demonstrates the happy path for core features, helping to validate the complete workflow of the platform.
@@ -131,12 +142,12 @@ The initial approach was to use the Publishing Platform as a central entry point
   - Verify token and SOL transfers
   - Validate marketplace fee collection
 
- ### Running Tests
+ ## Running Tests
 
-# Start local validator
+### Start local validator
  ```solana-test-validator -r --bpf-program metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s .anchor/metaplex.so```
 
-# Run all tests
+### Run all tests
 ```anchor test```
 
 Note: These tests are designed to validate complete features rather than individual functions. They ensure that the main user workflows function correctly in a realistic environment.
