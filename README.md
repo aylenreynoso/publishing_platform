@@ -98,66 +98,57 @@ The initial approach was to use the Publishing Platform as a central entry point
 ## Tests
 
 - The test suite focuses on integration testing, simulating real-world usage scenarios rather than unit tests. Each test file demonstrates the happy path for core features, helping to validate the complete workflow of the platform.
--
 
 ### Publishing Platform Tests
 
 - The publishing platform tests (`tests/publishing-platform.ts`) simulate a complete content creation and interaction flow:
--
-- 1. **Platform Setup**
-- - Initialize platform state
-- - Create writer and reader accounts
--
-- 2. **Content Creation Flow**
-- - Create a book collection
-- - Add chapters to the book
-- - Create exclusive content for NFT holders
--
-- 3. **Reader Interactions**
-- - Submit and verify chapter reviews
-- - Test tipping functionality
-- - Validate content access control
--
-- ### Marketplace Tests
--
+  1. **Platform Setup**
+   - Initialize platform state
+   - Create writer and reader accounts
+
+  2. **Content Creation Flow**
+   - Create a book collection
+   - Add chapters to the book
+   - Create exclusive content for NFT holders
+
+  3. **Reader Interactions**
+   - Submit and verify chapter reviews
+   - Test tipping functionality
+   - Validate content access control
+
+### Marketplace Tests
+
 - The marketplace tests (`tests/marketplace.ts`) demonstrate the NFT trading lifecycle:
--
-- 1. **Setup Flow**
-- - Initialize marketplace
-- - Create test NFT collection
-- - Mint test NFTs
--
-- 2. **Trading Flow**
-- - List NFT for sale
-- - Complete purchase
-- - Verify token and SOL transfers
-- - Validate marketplace fee collection
--
-- ### Running Tests
--
-- ```bash
 
-  ```
+ 1. **Setup Flow**
+  - Initialize marketplace
+  - Create test NFT collection
+  - Mint test NFTs
 
-- # Start local validator
-- solana-test-validator -r --bpf-program metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s .anchor/metaplex.so
--
-- # Run all tests
-- anchor test
-- ```
+ 2. **Trading Flow**
+  - List NFT for sale
+  - Complete purchase
+  - Verify token and SOL transfers
+  - Validate marketplace fee collection
 
-  ```
+ ### Running Tests
 
--
-- Note: These tests are designed to validate complete features rather than individual functions. They ensure that the main user workflows function correctly in a realistic environment.
+# Start local validator
+ ```solana-test-validator -r --bpf-program metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s .anchor/metaplex.so```
+
+# Run all tests
+```anchor test```
+
+Note: These tests are designed to validate complete features rather than individual functions. They ensure that the main user workflows function correctly in a realistic environment.
 
 ## References & Acknowledgments
 
 This project builds upon and learns from several open-source projects and examples:
 
-- [ASCorreira](https://github.com/ASCorreia/nft-operations)
-- [ASCorreira](https://github.com/ASCorreia/anchor-marketplace)
-- [Metaplex Token Metadata Program](https://github.com/metaplex-foundation/metaplex-program-library/tree/master/token-metadata)
+- [ASCorreira NFT Operations](https://github.com/ASCorreia/nft-operations)
+- [ASCorreira Anchor Marketplace](https://github.com/ASCorreia/anchor-marketplace)
+- [Metaplex Developer Hub](https://developers.metaplex.com/)
 - [Anchor Cookbook](https://book.anchor-lang.com/)
 - [Anchor Examples](https://github.com/coral-xyz/anchor/tree/master/examples)
-  Special thanks to these projects for providing excellent reference implementations and documentation.
+
+Special thanks to these projects for providing excellent reference implementations and documentation.
